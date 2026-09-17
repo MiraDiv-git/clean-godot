@@ -146,7 +146,6 @@
 #include "editor/project_upgrade/project_upgrade_tool.h"
 #include "editor/run/editor_run.h"
 #include "editor/run/editor_run_bar.h"
-#include "editor/run/game_view_plugin.h"
 #include "editor/scene/3d/material_3d_conversion_plugins.h"
 #include "editor/scene/3d/mesh_library_editor_plugin.h"
 #include "editor/scene/3d/node_3d_editor_plugin.h"
@@ -413,8 +412,6 @@ void EditorNode::shortcut_input(const Ref<InputEvent> &p_event) {
 			editor_main_screen->select(EditorMainScreen::EDITOR_3D);
 		} else if (ED_IS_SHORTCUT("editor/editor_script", p_event)) {
 			editor_main_screen->select(EditorMainScreen::EDITOR_SCRIPT);
-		} else if (ED_IS_SHORTCUT("editor/editor_game", p_event)) {
-			editor_main_screen->select(EditorMainScreen::EDITOR_GAME);
 		} else if (ED_IS_SHORTCUT("editor/editor_help", p_event)) {
 			emit_signal(SNAME("request_help_search"), "");
 		} else if (ED_IS_SHORTCUT("editor/editor_assetlib", p_event) && AssetLibraryEditorPlugin::is_available()) {
@@ -7682,9 +7679,6 @@ void EditorNode::_feature_profile_changed() {
 
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_3D, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_3D));
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_SCRIPT, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_SCRIPT));
-		if (!Engine::get_singleton()->is_recovery_mode_hint()) {
-			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_GAME, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_GAME));
-		}
 		if (AssetLibraryEditorPlugin::is_available()) {
 			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_ASSETLIB, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_ASSET_LIB));
 		}
@@ -7696,9 +7690,6 @@ void EditorNode::_feature_profile_changed() {
 		editor_dock_manager->set_dock_enabled(history_dock, true);
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_3D, true);
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_SCRIPT, true);
-		if (!Engine::get_singleton()->is_recovery_mode_hint()) {
-			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_GAME, true);
-		}
 		if (AssetLibraryEditorPlugin::is_available()) {
 			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_ASSETLIB, true);
 		}
@@ -8136,14 +8127,6 @@ void EditorNode::_touch_actions_panel_mode_changed() {
 			}
 			break;
 	}
-}
-#endif
-
-#ifdef MACOS_ENABLED
-extern "C" GameViewPluginBase *get_game_view_plugin();
-#else
-GameViewPluginBase *get_game_view_plugin() {
-	return memnew(GameViewPlugin);
 }
 #endif
 
@@ -9139,10 +9122,6 @@ EditorNode::EditorNode() {
 	add_editor_plugin(memnew(CanvasItemEditorPlugin));
 	add_editor_plugin(memnew(Node3DEditorPlugin));
 	add_editor_plugin(memnew(ScriptEditorPlugin));
-
-	if (!Engine::get_singleton()->is_recovery_mode_hint()) {
-		add_editor_plugin(get_game_view_plugin());
-	}
 
 	EditorAudioBuses *audio_bus_editor = EditorAudioBuses::register_editor();
 
